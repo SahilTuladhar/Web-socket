@@ -1,19 +1,41 @@
+import { log } from 'console'
+import dotenv from 'dotenv'
+dotenv.config()
+
 import express from 'express'
 import { createServer } from 'http'
-require('dotenv').config()
-const { Server } = require("socket.io")
+import {Server} from 'socket.io'
 
+const PORT = process.env.PORT 
 
-const httpServer = createServer();
-const socket = new Server(httpServer , {})
+const app = express()
+const httpServer = createServer(app);
+
+const socket = new Server(httpServer , {
+    cors:{
+        origin: process.env.CORS_ORIGIN
+    }
+})
 
 
 socket.on('connection' , (socket) => {
-    console.log(socket);
+
+    console.log("Client has been connected to the web-socket server");
+    
+    // console.log(socket);
+
+    // sending some message to the client from the server
+    socket.emit('messageFromServer' , 'Helllo from the web-socket server')
+
+    //handle component unmount
+    socket.on('disconnect' , () => {
+        console.log('Client has been disconencted from the server' , socket.id);
+        
+    })
     
 })
 
-httpServer.listen(process.env.PORT , () => {
-    console.log(`Successfully listening on the port: ${process.env.PORT}`);
+httpServer.listen(PORT , () => {
+    console.log(`Successfully listening on the port: ${PORT}`);
     
 })
